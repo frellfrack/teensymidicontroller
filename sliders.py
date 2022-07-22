@@ -44,7 +44,6 @@ class slidersTest:
 		s_bytes = self.serialCom.readline()
 		decoded_bytes = s_bytes.decode("utf-8").strip('\n')
 		values = [float(x) for x in decoded_bytes.split()]
-		values = [float(x) for x in decoded_bytes.split()]
 		return values
 	def drawSliders (self,values):
 		stop = len(values)
