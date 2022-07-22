@@ -62,12 +62,13 @@ bool readAxis(int slider)
    
    bool returnValue = false;
 
-   if(currentReading > 1023)
+   if(currentReading > 1020)
    {
       currentReading=1023;
    }
 
-   if(currentReading < 0)
+
+   if(currentReading < 2)
    {
       currentReading = 0;
    }
