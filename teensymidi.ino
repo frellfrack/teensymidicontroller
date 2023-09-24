@@ -2,8 +2,16 @@
 const int noSliders = 8;
 const int ledPin = LED_BUILTIN; // LED_BUILTIN represents the onboard LED pin
 
+
+// Struct to store slider information
+struct Slider {
+  int analogPin;
+  int jitterTolerance;
+  int currentReading;
+};
+
 // Store information about each slider: analog pin, jitter tolerance, and current reading
-int sliders[8][3] {
+Slider sliders[noSliders] = {
   {A0, 1, 0},  
   {A1, 1, 0},
   {A2, 1, 0},
@@ -13,6 +21,11 @@ int sliders[8][3] {
   {A6, 1, 0},
   {A7, 1, 0}
 };
+
+// Constants for readability
+const int maxAnalogReading = 1020;
+const int minAnalogReading = 2;
+const int readingDelay = 6;
 
 // MIDI channel to send control change messages
 const int channel = 1;
@@ -53,29 +66,33 @@ bool readAxisData() {
 
 // Function to read data from a single slider
 bool readAxis(int slider) {
-  int currentReading = analogRead(sliders[slider][0]);
+  int currentReading = analogRead(sliders[slider].analogPin);
    
   bool returnValue = false;
 
   // Ensure that readings near the lower and upper bounds are clamped
-  if (currentReading > 1020) {
+  if (currentReading > maxAnalogReading) {
     currentReading = 1023;
   }
 
-  if (currentReading < 2) {
+  if (currentReading < minAnalogReading) {
     currentReading = 0;
   }
   
   // Limit jitter and send MIDI control change message
-  if (currentReading < sliders[slider][2] - sliders[slider][1] || currentReading > sliders[slider][2] + sliders[slider][1]) {
-    sliders[slider][2] = currentReading;
+  if (
+    currentReading < sliders[slider].currentReading - sliders[slider].jitterTolerance || 
+    currentReading > sliders[slider].currentReading + sliders[slider].jitterTolerance
+  ) 
+  {
+    sliders[slider].currentReading = currentReading;
     byte data = currentReading >> 3;    
     usbMIDI.sendControlChange(slider, data, channel);
     returnValue = true;
   }
  
   // Delay to avoid excessive reading
-  delay(6);
+  delay(readingDelay);
   
   return returnValue; 
 }
@@ -86,10 +103,10 @@ void outputData() {
   
   
   for (int i = 0; i < noSliders - 1; i++) {
-    Serial.print(sliders[i][2]);
+    Serial.print(sliders[i].currentReading);
     Serial.print(" ");
   }
-  Serial.print(sliders[noSliders - 1][2]);
+  Serial.print(sliders[noSliders - 1].currentReading);
   Serial.print("\n");
   digitalWrite(ledPin, LOW);    // Turn the LED off
 }
