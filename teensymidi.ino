@@ -1,3 +1,4 @@
+#include <Arduino.h>
 // Define the number of sliders
 const int noSliders = 8;
 const int ledPin = LED_BUILTIN; // LED_BUILTIN represents the onboard LED pin
@@ -29,6 +30,13 @@ const int readingDelay = 6;
 
 // MIDI channel to send control change messages
 const int channel = 1;
+
+
+// put function declarations here:
+bool readAxis(int);
+bool readAxisData(); 
+bool readAxis(int slider);
+void outputData();
 
 void setup() {
   // Initialize serial communication for debugging
